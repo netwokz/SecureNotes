@@ -1,39 +1,73 @@
 package com.computeerror.securenotes;
 
-import android.Manifest;
-import android.app.KeyguardManager;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
-import android.os.CancellationSignal;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    String title = "Login";
-    String subtitle = "Please authenticate";
-    String description = "Place finger on the fingerprint scanner to proceed.";
+    String mTitle = "Login";
+    String mSubtitle = "Please authenticate";
+    String mDescription = "Place finger on the fingerprint scanner to proceed.";
+    CoordinatorLayout mMainLayoutId;
 
-    private CancellationSignal cancellationSignal;
+    boolean mIsAuthenticated = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mMainLayoutId = findViewById(R.id.main_activity);
 
-        if (checkBiometricSupport())
-            authenticateUser();
+//        authenticateUser();
+
+        if (mIsAuthenticated) {
+
+            // Begin the transaction
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // Replace the contents of the container with the new fragment
+            ft.replace(R.id.main_frame, new ListFragment());
+            // or ft.add(R.id.your_placeholder, new FooFragment());
+            // Complete the changes added above
+            ft.commit();
+            List<String> input = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                input.add("Test" + i);
+            }
+
+
+        }
+    }
+
+    private void logNotifyUser(String s) {
+        Log.d("Main", s);
+    }
+
+    private ArrayList<MyListData> generateListData() {
+        ArrayList<MyListData> myListData = new ArrayList<>();
+        for (int i = 0; i < 25; i++) {
+            myListData.add(new MyListData("Test " + i, "Description " + i));
+        }
+        return myListData;
     }
 
     public void authenticateUser() {
         BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(this)
-                .setTitle(title)
-                .setSubtitle(subtitle)
-                .setDescription(description)
+                .setTitle(mTitle)
+                .setSubtitle(mSubtitle)
+                .setDescription(mDescription)
                 .setNegativeButton("Cancel", this.getMainExecutor(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -41,75 +75,47 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).build();
 
-        biometricPrompt.authenticate(getCancellationSignal(), getMainExecutor(), getAuthenticationCallback());
-    }
-
-    private Boolean checkBiometricSupport() {
-
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-        PackageManager packageManager = this.getPackageManager();
-
-        if (!keyguardManager.isKeyguardSecure()) {
-            notifyUser("Lock screen security not enabled in Settings");
-            return false;
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.USE_BIOMETRIC) != PackageManager.PERMISSION_GRANTED) {
-
-            notifyUser("Fingerprint authentication permission not enabled");
-            return false;
-        }
-
-        if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            return true;
-        }
-
-        return true;
+        biometricPrompt.authenticate(BiometricUtils.getCancellationSignal(), getMainExecutor(), getAuthenticationCallback());
     }
 
     private void notifyUser(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-    private BiometricPrompt.AuthenticationCallback getAuthenticationCallback() {
+    private void snackbar(View view, String msg) {
+        Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show();
+    }
 
+    private BiometricPrompt.AuthenticationCallback getAuthenticationCallback() {
         return new BiometricPrompt.AuthenticationCallback() {
             @Override
-            public void onAuthenticationError(int errorCode,
-                                              CharSequence errString) {
+            public void onAuthenticationError(int errorCode, CharSequence errString) {
                 notifyUser("Authentication error: " + errString);
+                mIsAuthenticated = false;
                 super.onAuthenticationError(errorCode, errString);
             }
 
             @Override
-            public void onAuthenticationHelp(int helpCode,
-                                             CharSequence helpString) {
+            public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
                 super.onAuthenticationHelp(helpCode, helpString);
             }
 
             @Override
             public void onAuthenticationFailed() {
+                mIsAuthenticated = false;
                 super.onAuthenticationFailed();
             }
 
+
             @Override
-            public void onAuthenticationSucceeded(
-                    BiometricPrompt.AuthenticationResult result) {
-                notifyUser("Authentication Succeeded");
+            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+//                notifyUser("Authentication Succeeded");
+                snackbar(mMainLayoutId, "Authentication Succeeded");
+                mIsAuthenticated = true;
                 super.onAuthenticationSucceeded(result);
             }
         };
     }
 
-    private CancellationSignal getCancellationSignal() {
 
-        cancellationSignal = new CancellationSignal();
-        cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
-            @Override
-            public void onCancel() {
-                notifyUser("Cancelled via signal");
-            }
-        });
-        return cancellationSignal;
-    }
 }
