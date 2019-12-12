@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_list_view);
         mMainLayoutId = findViewById(R.id.main_activity);
 
 //        authenticateUser();
@@ -42,12 +42,6 @@ public class MainActivity extends AppCompatActivity {
             // or ft.add(R.id.your_placeholder, new FooFragment());
             // Complete the changes added above
             ft.commit();
-            List<String> input = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                input.add("Test" + i);
-            }
-
-
         }
     }
 

@@ -19,13 +19,10 @@ public class MyListData {
         return mDescription;
     }
 
-    private static int lastNum = 0;
-
     public static ArrayList<MyListData> generateList(int num) {
         ArrayList<MyListData> contacts = new ArrayList<MyListData>();
-
         for (int i = 1; i <= num; i++) {
-            contacts.add(new MyListData("Title " + ++lastNum, "Description " + ++lastNum));
+            contacts.add(new MyListData("Title " + i, "Description " + i));
         }
 
         return contacts;

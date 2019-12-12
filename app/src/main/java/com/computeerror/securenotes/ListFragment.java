@@ -24,22 +24,7 @@ public class ListFragment extends Fragment {
     // either dynamically or via XML layout inflation.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.main_list_fragment, parent, false);
-        // Defines the xml file for the fragment
-        myListData = MyListData.generateList(25);
-        logNotifyUser("ListFragment OnCreate");
 
-//            mAdapter.notifyDataSetChanged();
-        mRecyclerView = rootView.findViewById(R.id.recycler_view);
-        logNotifyUser("recyclerView = " + mRecyclerView);
-        mRecyclerView.setHasFixedSize(false);
-
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(MyApplication.getAppContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        // define an adapter
-        mAdapter = new MyAdapter(myListData);
-        mRecyclerView.setAdapter(mAdapter);
         return inflater.inflate(R.layout.main_list_fragment, parent, false);
     }
 
@@ -52,6 +37,20 @@ public class ListFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
-        // EditText etFoo = (EditText) view.findViewById(R.id.etFoo);
+        myListData = MyListData.generateList(25);
+        logNotifyUser("MyListData size = " + myListData.size());
+        logNotifyUser("ListFragment OnCreate");
+
+//            mAdapter.notifyDataSetChanged();
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+        logNotifyUser("recyclerView = " + mRecyclerView);
+        mRecyclerView.setHasFixedSize(false);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(MyApplication.getAppContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        // define an adapter
+        mAdapter = new MyAdapter(myListData);
+        mRecyclerView.setAdapter(mAdapter);
     }
 }
