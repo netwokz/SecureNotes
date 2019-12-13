@@ -1,12 +1,9 @@
 package com.computeerror.securenotes;
 
-import android.content.DialogInterface;
-import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,10 +59,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAuthenticationSucceeded(@NonNull androidx.biometric.BiometricPrompt.AuthenticationResult result) {
+                userAuthenticated();
                 super.onAuthenticationSucceeded(result);
-                //Print a message to Logcat//
-                mIsAuthenticated = true;
-                logNotifyUser("isAuthenticated = " + mIsAuthenticated);
+
             }
             //onAuthenticationFailed is called when the fingerprint doesn’t match//
 
@@ -79,9 +75,9 @@ public class MainActivity extends AppCompatActivity {
 
         final androidx.biometric.BiometricPrompt.PromptInfo promptInfo = new androidx.biometric.BiometricPrompt.PromptInfo.Builder()
                 //Add some text to the dialog//
-                .setTitle("Title text goes here")
-                .setSubtitle("Subtitle goes here")
-                .setDescription("This is the description")
+                .setTitle(mTitle)
+//                .setSubtitle(mSubtitle)
+                .setDescription(mDescription)
                 .setNegativeButtonText("Cancel")
                 //Build the dialog//
                 .build();
@@ -92,19 +88,20 @@ public class MainActivity extends AppCompatActivity {
                 myBiometricPrompt.authenticate(promptInfo);
             }
         });
+    }
 
-        //My dumbass code:
-//        authenticateUser();
-
-        if (mIsAuthenticated) {
-            // Begin the transaction
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            // Replace the contents of the container with the new fragment
-            ft.replace(R.id.main_frame, new ListFragment());
-            // or ft.add(R.id.your_placeholder, new FooFragment());
-            // Complete the changes added above
-            ft.commit();
-        }
+    private void userAuthenticated() {
+        //User is good son....
+        //Print a message to Logcat//
+//        mIsAuthenticated = true;
+        // logNotifyUser("isAuthenticated = " + mIsAuthenticated);
+        // Begin the transaction
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        // Replace the contents of the container with the new fragment
+        ft.replace(R.id.main_frame, new ListFragment());
+        // or ft.add(R.id.your_placeholder, new FooFragment());
+        // Complete the changes added above
+        ft.commit();
     }
 
     private void logNotifyUser(String s) {
@@ -119,59 +116,8 @@ public class MainActivity extends AppCompatActivity {
         return myListData;
     }
 
-    public void authenticateUser() {
-        BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(this)
-                .setTitle(mTitle)
-                .setSubtitle(mSubtitle)
-                .setDescription(mDescription)
-                .setNegativeButton("Cancel", this.getMainExecutor(), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        notifyUser("Authentication cancelled");
-                    }
-                }).build();
-
-        biometricPrompt.authenticate(BiometricUtils.getCancellationSignal(), getMainExecutor(), getAuthenticationCallback());
-    }
-
-    private void notifyUser(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
     private void snackbar(View view, String msg) {
         Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show();
-    }
-
-    private BiometricPrompt.AuthenticationCallback getAuthenticationCallback() {
-        return new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode, CharSequence errString) {
-                notifyUser("Authentication error: " + errString);
-                mIsAuthenticated = false;
-                super.onAuthenticationError(errorCode, errString);
-            }
-
-            @Override
-            public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
-                super.onAuthenticationHelp(helpCode, helpString);
-            }
-
-            @Override
-            public void onAuthenticationFailed() {
-                snackbar(mMainLayoutId, "Authentication Succeeded");
-                mIsAuthenticated = false;
-                super.onAuthenticationFailed();
-            }
-
-
-            @Override
-            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
-//                notifyUser("Authentication Succeeded");
-                snackbar(mMainLayoutId, "Authentication Succeeded");
-                mIsAuthenticated = true;
-                super.onAuthenticationSucceeded(result);
-            }
-        };
     }
 
     @Override
