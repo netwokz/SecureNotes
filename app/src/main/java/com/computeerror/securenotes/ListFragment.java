@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +38,10 @@ public class ListFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // Setup any handles to view objects here
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+
+
         myListData = MyListData.generateList(25);
         logNotifyUser("MyListData size = " + myListData.size());
         logNotifyUser("ListFragment OnCreate");
